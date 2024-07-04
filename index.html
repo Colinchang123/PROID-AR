@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>AR.js Example with Video and 3D Model</title>
+    <title>AR.js Example with Video and Persistent 3D Model</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/master/aframe/build/aframe-ar.js"></script>
   </head>
@@ -16,13 +16,13 @@
       <!-- Define the second marker for the 3D model -->
       <a-marker preset='custom' type="pattern" url="./pattern2.patt">
         <!-- Add a 3D model -->
-        <a-entity gltf-model="url(./scene.gltf)" scale="0.5 0.5 0.5" position="0 0 0" rotation="-90 0 0"></a-entity>
+        <a-entity id="model2" gltf-model="url(./scene.gltf)" scale="0.5 0.5 0.5" position="0 0 0" rotation="-90 0 0"></a-entity>
       </a-marker>
 
       <!-- Define the third marker for the 3D model with persistence -->
       <a-marker preset='custom' type="pattern" url="./pattern3.patt" id="marker3">
-        <!-- Add a 3D model -->
-        <a-entity id="model3" gltf-model="url(./scene.gltf)" scale="0.5 0.5 0.5" position="0 0 0" rotation="-90 0 0"></a-entity>
+        <!-- Placeholder entity for persistent model -->
+        <a-entity id="persistentModelContainer"></a-entity>
       </a-marker>
 
       <a-entity camera></a-entity>
@@ -32,17 +32,24 @@
     <video id="video" src="./wave_gif.mp4" autoplay loop crossorigin="anonymous" style="display: none;"></video>
 
     <script>
-      document.querySelector('#marker3').addEventListener('markerFound', function () {
-        // Clone the 3D model and add it to the scene
-        const scene = document.querySelector('a-scene');
-        const modelClone = document.querySelector('#model3').cloneNode(true);
-        modelClone.setAttribute('id', 'persistentModel');
+      // Function to handle marker found event
+      function handleMarkerFound(event) {
+        const marker = event.target;
+        const modelClone = document.createElement('a-entity');
+        modelClone.setAttribute('gltf-model', './scene.gltf'); // Replace with your model path
+        modelClone.setAttribute('scale', '0.5 0.5 0.5');
+        modelClone.setAttribute('position', '0 0 0'); // Adjust as needed
+        modelClone.setAttribute('rotation', '-90 0 0'); // Adjust as needed
         modelClone.setAttribute('visible', 'true');
-        scene.appendChild(modelClone);
+        marker.querySelector('#persistentModelContainer').appendChild(modelClone);
 
         // Remove the marker so it doesn't get added multiple times
-        document.querySelector('#marker3').remove();
-      });
+        marker.removeEventListener('markerFound', handleMarkerFound);
+        marker.removeAttribute('id'); // Optional: Remove the ID to prevent re-triggering
+      }
+
+      // Add event listener for marker found on marker3
+      document.querySelector('#marker3').addEventListener('markerFound', handleMarkerFound);
     </script>
   </body>
 </html>
