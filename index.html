@@ -4,11 +4,99 @@
     <title>AR.js Example with Video and 3D Model</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/master/aframe/build/aframe-ar.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@6.1.0/dist/aframe-extras.min.js"></script>
-    <script src="https://unpkg.com/aframe-gesture-detector-component@3.4.0/dist/aframe-gesture-detector-component.min.js"></script>
+    
+    <!-- Gesture Detector Component -->
+    <script>
+      AFRAME.registerComponent('gesture-detector', {
+        schema: {
+          element: {default: ''}
+        },
+        init: function () {
+          this.targetElement = document.querySelector(this.data.element) || this.el;
+          this.internalState = {
+            previousState: null,
+          };
+          this.emitGestureEvent = this.emitGestureEvent.bind(this);
+          this.targetElement.addEventListener('touchstart', this.emitGestureEvent);
+          this.targetElement.addEventListener('touchend', this.emitGestureEvent);
+          this.targetElement.addEventListener('touchmove', this.emitGestureEvent);
+        },
+        remove: function () {
+          this.targetElement.removeEventListener('touchstart', this.emitGestureEvent);
+          this.targetElement.removeEventListener('touchend', this.emitGestureEvent);
+          this.targetElement.removeEventListener('touchmove', this.emitGestureEvent);
+        },
+        emitGestureEvent: function (event) {
+          const currentState = this.getTouchState(event);
+          const previousState = this.internalState.previousState;
+          const gestureContinues = previousState && currentState && currentState.touchCount === previousState.touchCount;
+          const eventDetail = {
+            state: currentState,
+            eventType: event.type,
+            gestureContinues: gestureContinues,
+            previousState: previousState
+          };
+
+          this.el.emit('gesture', eventDetail);
+
+          this.internalState.previousState = currentState;
+        },
+        getTouchState: function (event) {
+          if (event.touches.length === 0) return null;
+          const touchState = {
+            touchCount: event.touches.length,
+            position: { x: 0, y: 0 },
+            spread: 0
+          };
+
+          for (let i = 0; i < event.touches.length; i++) {
+            touchState.position.x += event.touches[i].screenX;
+            touchState.position.y += event.touches[i].screenY;
+          }
+
+          touchState.position.x /= event.touches.length;
+          touchState.position.y /= event.touches.length;
+
+          if (event.touches.length >= 2) {
+            const dx = event.touches[0].screenX - event.touches[1].screenX;
+            const dy = event.touches[0].screenY - event.touches[1].screenY;
+            touchState.spread = Math.sqrt(dx * dx + dy * dy);
+          }
+
+          return touchState;
+        }
+      });
+    </script>
+
+    <!-- Gesture Handler Component -->
+    <script>
+      AFRAME.registerComponent('gesture-handler', {
+        schema: {
+          rotationFactor: {default: 5}
+        },
+        init: function () {
+          this.handleGesture = this.handleGesture.bind(this);
+          this.el.sceneEl.addEventListener('gesture', this.handleGesture);
+        },
+        remove: function () {
+          this.el.sceneEl.removeEventListener('gesture', this.handleGesture);
+        },
+        handleGesture: function (event) {
+          const gestureState = event.detail.state;
+          const previousState = event.detail.previousState;
+          if (!gestureState || !previousState) return;
+
+          if (gestureState.touchCount === 1 && event.detail.gestureContinues) {
+            const dX = gestureState.position.x - previousState.position.x;
+            const dY = gestureState.position.y - previousState.position.y;
+            this.el.object3D.rotation.y += dX * this.data.rotationFactor * 0.01;
+          }
+        }
+      });
+    </script>
   </head>
   <body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs>
+    <a-scene embedded arjs gesture-detector="element: body">
       <!-- Define the first marker for the video -->
       <a-marker preset='custom' type="pattern" url="./pattern.patt">
         <!-- Add a flat plane showing a video -->
@@ -17,8 +105,8 @@
 
       <!-- Define the second marker for the 3D model -->
       <a-marker preset='custom' type="pattern" url="./pattern2.patt">
-        <!-- Add a 3D model with gesture-detector component -->
-        <a-entity id="model" gltf-model="url(./scene.gltf)" scale="0.5 0.5 0.5" position="0 0 0" rotation="0 0 0" gesture-detector></a-entity>
+        <!-- Add a 3D model with gesture handler -->
+        <a-entity gltf-model="url(./scene.gltf)" scale="0.5 0.5 0.5" position="0 0 0" rotation="-90 0 0" class="clickable" gesture-handler></a-entity>
       </a-marker>
 
       <a-entity camera></a-entity>
@@ -26,25 +114,5 @@
 
     <!-- Define the video -->
     <video id="video" src="./wave_gif.mp4" autoplay loop crossorigin="anonymous" style="display: none;"></video>
-
-    <script>
-      AFRAME.registerComponent('rotate-on-gesture', {
-        init: function () {
-          var model = this.el;
-          var initialRotation = model.getAttribute('rotation');
-
-          this.el.addEventListener('onefingermove', function (event) {
-            var rotation = {
-              x: initialRotation.x,
-              y: initialRotation.y + event.detail.positionChange.x,
-              z: initialRotation.z
-            };
-            model.setAttribute('rotation', rotation);
-          });
-        }
-      });
-
-      document.querySelector('#model').setAttribute('rotate-on-gesture', '');
-    </script>
   </body>
 </html>
