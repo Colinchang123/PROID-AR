@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>new3.js Example</title>
+    <title>AR.js Example with Video</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/master/aframe/build/aframe-ar.js"></script>
   </head>
@@ -9,10 +9,13 @@
     <a-scene embedded arjs>
       <!-- Define a marker -->
       <a-marker preset="hiro">
-        <!-- Add a 3D object (a box in this case) -->
-           <a-entity gltf-model="url(./scene.gltf)" scale="1 1 1" position="0 0 0" rotation="-90 0 0"></a-entity>
+        <!-- Add a flat plane showing a video -->
+        <a-plane src="#video" width="1" height="1" position="0 0 0" rotation="-90 0 0"></a-plane>
       </a-marker>
       <a-entity camera></a-entity>
     </a-scene>
+
+    <!-- Define the video -->
+    <video id="video" src=".\sponge.mp4" autoplay loop crossorigin="anonymous" style="display: none;"></video>
   </body>
 </html>
