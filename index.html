@@ -90,6 +90,7 @@
             const dX = gestureState.position.x - previousState.position.x;
             const dY = gestureState.position.y - previousState.position.y;
             this.el.object3D.rotation.y += dX * this.data.rotationFactor * 0.01;
+            this.el.object3D.rotation.x += dY * this.data.rotationFactor * 0.01;
           }
         }
       });
