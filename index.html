@@ -7,8 +7,8 @@
   </head>
   <body style="margin: 0; overflow: hidden;">
     <a-scene embedded arjs>
-      <!-- Define a marker -->
-      <a-marker preset="hiro">
+      <!-- Define a custom marker -->
+      <a-marker type="pattern" url="./pattern.patt">
         <!-- Add a flat plane showing a video -->
         <a-plane src="#video" width="1" height="1" position="0 0 0" rotation="-90 0 0"></a-plane>
       </a-marker>
@@ -16,6 +16,7 @@
     </a-scene>
 
     <!-- Define the video -->
-    <video id="video" src=".\sponge.mp4" autoplay loop crossorigin="anonymous" style="display: none;"></video>
+    <video id="video" src="./sponge.mp4" autoplay loop crossorigin="anonymous" style="display: none;"></video>
   </body>
 </html>
+
