@@ -1,44 +1,45 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>AR.js Example with Video and 3D Model</title>
+    <title>A.js Example with Persistent Model</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/master/aframe/build/aframe-ar.js"></script>
   </head>
   <body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs>
-      <!-- Define the first marker for the video -->
-      <a-marker preset='custom' type="pattern" url="./pattern.patt">
-        <!-- Add a flat plane showing a video -->
-        <a-plane src="#video" width="0.5" height="0.5" position="0 0 0" rotation="-90 0 0"></a-plane>
+    <a-scene embedded arjs="trackingMethod: best; debugUIEnabled: false; sourceType: webcam;">
+      <!-- Define a marker -->
+      <a-marker preset="hiro">
+        <!-- Add a 3D object (a GLTF model with animation and rigging) -->
+        <a-entity gltf-model="./rigged_animation.glb"
+                  scale="0.02 0.02 0.02"
+                  position="0 0 0"
+                  rotation="0 180 0"
+                  animation-mixer>
+        </a-entity>
+        <!-- Set rotation attribute to rotate the model -->
       </a-marker>
 
-      <!-- Define the second marker for the 3D model -->
-      <a-marker preset='custom' type="pattern" url="./pattern2.patt">
-        <!-- Add a 3D model -->
-        <a-entity gltf-model="url(./scene.gltf)" scale="0.5 0.5 0.5" position="0 0 0" rotation="-90 0 0"></a-entity>
-      </a-marker>
-
-      <!-- Define the third marker for the 3D model with persistence -->
-      <a-marker preset='custom' type="pattern" url="./pattern3.patt" id="marker3">
-        <!-- Add a 3D model -->
-        <a-entity id="model3" gltf-model="url(./scene.gltf)" scale="0.5 0.5 0.5" position="0 0 0" rotation="-90 0 0" visible="false"></a-entity>
-      </a-marker>
+      <!-- Use hit-testing for persistence -->
+      <a-entity id="hitTest" hit-testing></a-entity>
 
       <a-entity camera></a-entity>
     </a-scene>
 
-    <!-- Define the video -->
-    <video id="video" src="./wave_gif.mp4" autoplay loop crossorigin="anonymous" style="display: none;"></video>
-
     <script>
-      // JavaScript to handle the visibility of the third model
-      document.querySelector('#marker3').addEventListener('markerFound', function () {
-        document.querySelector('#model3').setAttribute('visible', 'true');
-      });
+      // Wait for scene to load
+      document.querySelector('a-scene').addEventListener('loaded', function () {
+        var sceneEl = document.querySelector('a-scene');
 
-      document.querySelector('#marker3').addEventListener('markerLost', function () {
-        // Do nothing to keep the model visible
+        // Handle hit-test result
+        sceneEl.addEventListener('touchstart', function (event) {
+          // Get hit-test result
+          var hitTestResult = event.detail.intersection && event.detail.intersection.object.el;
+
+          if (hitTestResult) {
+            // Append model to hit-test position
+            hitTestResult.appendChild(document.querySelector('[gltf-model]'));
+          }
+        });
       });
     </script>
   </body>
