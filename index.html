@@ -4,9 +4,11 @@
     <title>AR.js Example with Video and 3D Model</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/supermedium/superframe@master/dist/super-hands.min.js"></script>
+    <script src="https://cdn.rawgit.com/n5ro/aframe-physics-system/master/dist/aframe-physics-system.min.js"></script>
   </head>
   <body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs>
+    <a-scene embedded arjs physics="debug: true">
       <!-- Define the first marker for the video -->
       <a-marker preset='custom' type="pattern" url="./pattern.patt">
         <!-- Add a flat plane showing a video -->
@@ -16,7 +18,9 @@
       <!-- Define the second marker for the 3D model -->
       <a-marker preset='custom' type="pattern" url="./pattern2.patt">
         <!-- Add a 3D model -->
-        <a-entity id="model" gltf-model="url(./scene.gltf)" scale="0.5 0.5 0.5" position="0 0 0" rotation="-90 0 0" visible="false"></a-entity>
+        <a-entity id="model" gltf-model="url(./scene.gltf)" scale="0.5 0.5 0.5" position="0 0 0" rotation="-90 0 0" visible="false" static-body>
+          <a-sphere radius="0.1" color="#FFC65D" position="0 0.25 0" dynamic-body></a-sphere>
+        </a-entity>
       </a-marker>
 
       <a-entity camera></a-entity>
@@ -32,7 +36,7 @@
 
       // Event listener for when the second marker is found
       scene.addEventListener('markerFound', function (event) {
-        if (event.target.id === 'pattern2') {
+        if (event.target.getAttribute('type') === 'pattern' && event.target.getAttribute('url') === './pattern2.patt') {
           // Set the 3D model visible when marker is found
           document.getElementById('model').setAttribute('visible', true);
         }
@@ -40,9 +44,9 @@
 
       // Event listener for when the second marker is lost
       scene.addEventListener('markerLost', function (event) {
-        if (event.target.id === 'pattern2') {
-          // Set the 3D model invisible when marker is lost
-          document.getElementById('model').setAttribute('visible', false);
+        if (event.target.getAttribute('type') === 'pattern' && event.target.getAttribute('url') === './pattern2.patt') {
+          // Keep the 3D model visible even when marker is lost
+          // document.getElementById('model').setAttribute('visible', false);
         }
       });
     </script>
