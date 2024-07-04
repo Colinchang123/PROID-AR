@@ -19,10 +19,27 @@
         <a-entity gltf-model="url(./scene.gltf)" scale="0.5 0.5 0.5" position="0 0 0" rotation="-90 0 0"></a-entity>
       </a-marker>
 
+      <!-- Define the third marker for the 3D model with persistence -->
+      <a-marker preset='custom' type="pattern" url="./pattern3.patt" id="marker3">
+        <!-- Add a 3D model -->
+        <a-entity id="model3" gltf-model="url(./scene.gltf)" scale="0.5 0.5 0.5" position="0 0 0" rotation="-90 0 0" visible="false"></a-entity>
+      </a-marker>
+
       <a-entity camera></a-entity>
     </a-scene>
 
     <!-- Define the video -->
     <video id="video" src="./wave_gif.mp4" autoplay loop crossorigin="anonymous" style="display: none;"></video>
+
+    <script>
+      // JavaScript to handle the visibility of the third model
+      document.querySelector('#marker3').addEventListener('markerFound', function () {
+        document.querySelector('#model3').setAttribute('visible', 'true');
+      });
+
+      document.querySelector('#marker3').addEventListener('markerLost', function () {
+        // Do nothing to keep the model visible
+      });
+    </script>
   </body>
 </html>
