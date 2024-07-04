@@ -1,17 +1,24 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>AR.js Example with Video</title>
+    <title>AR.js Example with Video and 3D Model</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/master/aframe/build/aframe-ar.js"></script>
   </head>
   <body style="margin: 0; overflow: hidden;">
     <a-scene embedded arjs>
-      <!-- Define a custom marker -->
+      <!-- Define the first marker for the video -->
       <a-marker preset='custom' type="pattern" url="./pattern.patt">
         <!-- Add a flat plane showing a video -->
         <a-plane src="#video" width="0.5" height="0.5" position="0 0 0" rotation="-90 0 0"></a-plane>
       </a-marker>
+
+      <!-- Define the second marker for the 3D model -->
+      <a-marker preset='custom' type="pattern" url="./pattern2.patt">
+        <!-- Add a 3D model -->
+        <a-entity gltf-model="url(./scene.gltf)" scale="0.5 0.5 0.5" position="0 0 0" rotation="0 180 0"></a-entity>
+      </a-marker>
+
       <a-entity camera></a-entity>
     </a-scene>
 
@@ -19,4 +26,3 @@
     <video id="video" src="./wave_gif.mp4" autoplay loop crossorigin="anonymous" style="display: none;"></video>
   </body>
 </html>
-
